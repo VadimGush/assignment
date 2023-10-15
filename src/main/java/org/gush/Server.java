@@ -18,10 +18,16 @@ public class Server extends AbstractVerticle {
     private Service service;
 
     @Override
+    public void stop() throws Exception {
+        super.stop();
+        service.close();
+    }
+
+    @Override
     public void start(Promise<Void> start) throws Exception {
         router = Router.router(vertx);
 
-        service = new Service(new Database("logs.txt"));
+        service = new Service(new Database("/Users/vadim/logs.txt"));
 
         router.route().handler(BodyHandler.create());
 
