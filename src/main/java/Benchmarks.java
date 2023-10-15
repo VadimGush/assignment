@@ -1,5 +1,6 @@
 import database.Database;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,15 +20,18 @@ public class Benchmarks {
      * because the throughput will fluctuate depending on GC behaviour
      * and JIT compiler. But it is good enough for now
      */
-    public static void measureThroughput() {
+    public static void measureThroughput() throws IOException {
         final List<String> testData = generateTestData();
+
+        // Do not include startup time
+        final Service service = new Service(new Database("logs.txt"));
 
         final LocalDateTime start = LocalDateTime.now();
 
-        final Service service = new Service(new Database());
         for (final String query : testData) {
             service.handle(query);
         }
+        service.close();
 
         final LocalDateTime end = LocalDateTime.now();
 
@@ -42,7 +46,7 @@ public class Benchmarks {
         final List<String> result = new ArrayList<>();
 
         final Random random = new Random();
-        for (int i = 0; i < 10_000; i++) {
+        for (int i = 0; i < 100_000; i++) {
 
             // Generate a random string
             final StringBuilder buffer = new StringBuilder();

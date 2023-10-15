@@ -1,12 +1,17 @@
 package database;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
  * Stores all the data and performs data search.
  */
-public class Database {
+public class Database implements Closeable {
+
+    private final Persistance persistance;
 
     // Strings sorted by total character values
     // NOTE: Assignment doesn't specify what should happen if 2 strings
@@ -16,6 +21,23 @@ public class Database {
 
     // Lexical order is preserved
     public final TreeMap<Double, String> lexicalDictionary = new TreeMap<>();
+
+    public Database(final String logFilepath) throws IOException {
+        this.persistance = new Persistance(logFilepath);
+        this.initDb();
+    }
+
+    private void initDb() throws IOException {
+        final List<DbRecord> logs = persistance.readFromLog();
+        if (!logs.isEmpty()) {
+            System.out.println("=> Loading the database from the disk");
+            logs.forEach(record -> {
+                lexicalDictionary.put(record.lexicalWeight, record.word);
+                valueDictionary.put(record.totalCharacterValue, record.word);
+            });
+            System.out.println("=> Loading complete! Entries: " + logs.size());
+        }
+    }
 
     /**
      * Returns the closest word in terms of the total character value
@@ -77,9 +99,17 @@ public class Database {
         return greaterValueDistance < lowerValueDistance ? greaterOrEqual.getValue() : lower.getValue();
     }
 
-    public void insert(final DbRecord dbRecord) {
+    public void insert(final DbRecord dbRecord) throws IOException {
+        // Save to the disk first
+        persistance.writeToLog(dbRecord);
+
+        // Then to memory
         lexicalDictionary.put(dbRecord.lexicalWeight, dbRecord.word);
         valueDictionary.put(dbRecord.totalCharacterValue, dbRecord.word);
     }
 
+    @Override
+    public void close() throws IOException {
+        persistance.close();
+    }
 }

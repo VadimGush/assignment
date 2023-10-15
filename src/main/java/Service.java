@@ -1,12 +1,13 @@
 import database.Database;
 import database.DbRecord;
 
-import java.util.*;
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
  * The service itself which handles incoming queries.
  */
-public class Service {
+public class Service implements Closeable {
 
     private final Database database;
 
@@ -23,11 +24,15 @@ public class Service {
             // character is: character_value = ASCII value - 96;
             totalCharacterValue += string.charAt(i) - 96;
 
+            // NOTE: I'm very confused by the notion of "lexically closest" honestly,
+            // but currently I'm just converting strings to double values (lexical weight)
+            // and then comparing only those numerical values to find "lexically closest".
+
             // Every character has a weight depending on its position in the string.
             // The closer the position to the beginning of the string, the higher weight will be.
 
-            // NOTE: Please read the note in the getClosestLexically() function!
-            lexicalWeight += ((string.charAt(i) - 97) / 26.) / Math.pow(26., i);
+            // TODO: This function will behave badly on strings with very large size!
+            lexicalWeight += ((string.charAt(i) - 96) / 26.) / Math.pow(26., i);
         }
 
         return new Weights(totalCharacterValue, lexicalWeight);
@@ -35,7 +40,7 @@ public class Service {
 
 
     // TODO: Does this method will be called by multiple threads?
-    public Result handle(final String word) {
+    public Result handle(final String word) throws IOException {
         final Weights weights = calculateWeights(word);
 
         // Get the closest string in terms of total character value
@@ -48,6 +53,11 @@ public class Service {
         database.insert(new DbRecord(word, weights.totalCharacterValue, weights.lexicalWeight));
 
         return new Result(closestValue, closestLexically);
+    }
+
+    @Override
+    public void close() throws IOException {
+        database.close();
     }
 
     /**
