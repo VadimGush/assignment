@@ -1,4 +1,7 @@
-import database.Database;
+package org.gush;
+
+
+import org.gush.database.Database;
 
 import java.io.IOException;
 import java.time.Duration;

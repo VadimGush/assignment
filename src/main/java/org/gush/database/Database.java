@@ -1,4 +1,4 @@
-package database;
+package org.gush.database;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -11,7 +11,7 @@ import java.util.TreeMap;
  */
 public class Database implements Closeable {
 
-    private final Persistance persistance;
+    private final Persistence persistence;
 
     // Strings sorted by total character values
     // NOTE: Assignment doesn't specify what should happen if 2 strings
@@ -23,12 +23,12 @@ public class Database implements Closeable {
     public final TreeMap<Double, String> lexicalDictionary = new TreeMap<>();
 
     public Database(final String logFilepath) throws IOException {
-        this.persistance = new Persistance(logFilepath);
+        this.persistence = new Persistence(logFilepath);
         this.initDb();
     }
 
     private void initDb() throws IOException {
-        final List<DbRecord> logs = persistance.readFromLog();
+        final List<DbRecord> logs = persistence.readFromLog();
         if (!logs.isEmpty()) {
             System.out.println("=> Loading the database from the disk");
             logs.forEach(record -> {
@@ -101,7 +101,7 @@ public class Database implements Closeable {
 
     public void insert(final DbRecord dbRecord) throws IOException {
         // Save to the disk first
-        persistance.writeToLog(dbRecord);
+        persistence.writeToLog(dbRecord);
 
         // Then to memory
         lexicalDictionary.put(dbRecord.lexicalWeight, dbRecord.word);
@@ -110,6 +110,6 @@ public class Database implements Closeable {
 
     @Override
     public void close() throws IOException {
-        persistance.close();
+        persistence.close();
     }
 }

@@ -1,4 +1,4 @@
-package database;
+package org.gush.database;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -16,13 +16,13 @@ import java.util.List;
  * This will give us both storage saving and fast writes. Though, we need to do that in
  * a separate thread.
  */
-public class Persistance implements Closeable {
+public class Persistence implements Closeable {
 
     private final File logs;
 
     private OutputStream logsOutputStream = null;
 
-    public Persistance(final String filepath) {
+    public Persistence(final String filepath) {
         logs = new File(filepath);
     }
 

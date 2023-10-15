@@ -1,4 +1,4 @@
-package database;
+package org.gush.database;
 
 public class DbRecord {
 

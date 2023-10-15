@@ -1,5 +1,8 @@
-import database.Database;
-import database.DbRecord;
+package org.gush;
+
+
+import org.gush.database.Database;
+import org.gush.database.DbRecord;
 
 import java.io.Closeable;
 import java.io.IOException;
